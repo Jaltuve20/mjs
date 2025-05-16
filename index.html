@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veamos</title>
+    <title>¿Quieres ser mi novia?</title>
     <style>
         * {
             margin: 0;
@@ -386,29 +386,13 @@
             box-shadow: none !important;
         }
         
-        /* Estilos para el formulario */
-        #response-form {
+        /* Estilos para el mensaje de confirmación */
+        .form-success {
             display: none;
-            margin-top: 2rem;
-            text-align: center;
-        }
-        
-        #response-form input {
-            padding: 0.8rem;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            margin-bottom: 1rem;
-            width: 100%;
-            max-width: 300px;
-        }
-        
-        #response-form button {
-            background: linear-gradient(45deg, #ff6b6b, #ffa0a0);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 5px;
-            cursor: pointer;
+            margin-top: 1rem;
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
     </style>
 </head>
@@ -443,9 +427,9 @@
     <!-- Modal (con pregunta y ahora 3 botones) -->
     <div id="modal" class="modal">
         <div class="modal-content">
-            <h1>¿Quieres ser mi novia?</h1>
-                <p>Antes de todo quiero que sepas que te dare todo lo que este a mi alcance</p>
-                <p>Sí, podemos salir, pasear, divertirnos juntos y darte todo mi amor posible,</p>
+            <h1>¿Me dejas ser tu novio?</h1>
+                <p>Antes de todo quiero que sepas que no tengo mucho que ofrecerte</p>
+                <p>Sí, podemos salir, pasear, divertirnos juntos y darte todo el amor,</p>
                 <p>apoyo y estabilidad que necesitas. <strong>Te amo demasiado.</strong></p>
                 <p>Si necesitas más tiempo para pensarlo esta bien, lo entenderé.</p>
             
@@ -468,14 +452,14 @@
             </div>
             
             <!-- Formulario oculto para enviar la respuesta -->
-            <form id="response-form" action="https://formsubmit.co/altuveleonardo96@gmail.com" method="POST">
-                <input type="hidden" name="_subject" value="¡Respuesta a tu pregunta!">
+            <form id="response-form" style="display: none;">
                 <input type="hidden" id="user-response" name="response" value="">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_next" value="">
-                <input type="text" name="name" placeholder="Tu nombre" required>
-                <button type="submit">Enviar respuesta</button>
             </form>
+            
+            <!-- Mensaje de confirmación -->
+            <div class="form-success" id="form-success">
+                Respuesta enviada ❤️
+            </div>
         </div>
     </div>
 
@@ -492,6 +476,7 @@
             const container = document.querySelector('.container');
             const responseForm = document.getElementById('response-form');
             const userResponseInput = document.getElementById('user-response');
+            const formSuccess = document.getElementById('form-success');
             
             // Abrir modal
             openModalBtn.addEventListener('click', () => {
@@ -596,10 +581,29 @@
                 noBtn.disabled = true;
             }
             
-            // Mostrar formulario para enviar respuesta
-            function showResponseForm(response) {
-                userResponseInput.value = response;
-                responseForm.style.display = 'block';
+            // Enviar la respuesta al servidor
+            async function sendResponse(response) {
+                try {
+                    const formData = new FormData();
+                    formData.append('response', response);
+                    formData.append('_subject', '¡Respuesta a tu pregunta!');
+                    
+                    await fetch('https://formsubmit.co/ajax/altuveleonardo96@gmail.com', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    
+                    formSuccess.style.display = 'block';
+                    setTimeout(() => {
+                        modal.classList.remove('show');
+                        formSuccess.style.display = 'none';
+                    }, 2000);
+                } catch (error) {
+                    console.error('Error al enviar la respuesta:', error);
+                }
             }
             
             // Evento para el botón "Sí"
@@ -608,7 +612,7 @@
                 yesBtn.innerHTML = '❤️ ¡Te quiero! ❤️';
                 yesBtn.disabled = false;
                 celebrate();
-                showResponseForm("¡Sí, quiero!");
+                sendResponse("¡Sí, quiero!");
             });
             
             // Evento para el botón "Déjame pensarlo"
@@ -618,7 +622,7 @@
                 rejectionMessage.style.display = 'none';
                 thinkBtn.textContent = "Esperaré tu respuesta";
                 createFloatingHearts(10);
-                showResponseForm("Déjame pensarlo");
+                sendResponse("Déjame pensarlo");
             });
             
             // Evento para el botón "No, no quiero"
@@ -628,7 +632,7 @@
                 thinkingMessage.style.display = 'none';
                 noBtn.textContent = "Entiendo";
                 createFloatingHearts(3);
-                showResponseForm("No, no quiero");
+                sendResponse("No, no quiero");
             });
         });
     </script>
